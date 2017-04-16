@@ -6,11 +6,14 @@ struct Primes {
 
 impl Primes {
     fn iter(&mut self) -> PrimesIterator {
-        PrimesIterator {primes: self, cur_idx: 0}
+        PrimesIterator {
+            primes: self,
+            cur_idx: 0,
+        }
     }
 
     fn new() -> Self {
-        Primes {primes: vec![2, 3, 5]}
+        Primes { primes: vec![2, 3, 5] }
     }
 }
 
@@ -25,12 +28,11 @@ impl<'a> Iterator for PrimesIterator<'a> {
         let idx = self.cur_idx;
         if idx >= self.primes.primes.len() {
             //We need to calculate the next prime
-            let next_prime = (self.primes.primes.last().unwrap()+1..).filter(|&n| {
-                //Try to divide n by all known primes.
-                self.primes.primes.iter().all(|&p| {
-                    (n/p)*p != n
-                })
-            }).next().unwrap();
+            //Try to divide n by all known primes.
+            let next_prime = (self.primes.primes.last().unwrap() + 1..)
+                .filter(|&n| self.primes.primes.iter().all(|&p| n % p != 0))
+                .next()
+                .unwrap();
             self.primes.primes.push(next_prime);
         }
         self.cur_idx += 1;
@@ -44,7 +46,11 @@ fn main() {
     let mut primes = Primes::new();
     let mut max_factor = 1;
     while max_factor < num {
-        let factor = primes.iter().filter(|&p| (num/p)*p == num).next().unwrap();
+        let factor = primes
+            .iter()
+            .filter(|&p| (num % p == 0))
+            .next()
+            .unwrap();
         println!("{}", factor);
         max_factor = cmp::max(factor, max_factor);
         num /= factor;
